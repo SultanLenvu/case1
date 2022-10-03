@@ -1,3 +1,11 @@
+
+/*
+  Задания - это этапы выполнения лабораторной работы.
+  Незакоментированный код относится к выполнению задачи первого кейса, 
+  заключающегося в реализации электронного кодового замка
+  с помощью электромагнитного реле и четырекнопочной клавиатуры
+*/
+
 #include "mbed.h"
 
 /* Первое задание
@@ -10,9 +18,31 @@ PwmOut led(LED1);
 int brightness = 0;
 */
 
-/* Третье задание */
+/* Третье задание 
 AnalogIn my_adc(PA_7); //D11 on board
 DigitalOut led(LED1);
+*/
+
+/* Задача кейса */
+
+DigitalIn buttonS1(PA_4);
+DigitalIn buttonS2(PB_0);
+DigitalIn buttonS3(PB_3);
+DigitalIn buttonS4(PB_10); 
+
+DigitalOut ReleyControl(PC_1);
+DigitalOut led(LED1);
+
+#define VALID_KEY 0x36 // Валидный ключ
+#define KEY_LENGTH 0x04 // Длина валидного ключа
+
+#define BUTTON1_CODE 0 // Коды кнопок
+#define BUTTON2_CODE 1
+#define BUTTON3_CODE 2
+#define BUTTON4_CODE 3
+
+uint8_t currentKeylength = 0; // Счетчик нажатий
+uint8_t currentInput = 0; // Буфер последовтельности нажатий
 
 int main(){
 /* Первое задание
@@ -40,12 +70,64 @@ int main(){
     printf("%c %i \n \r",c, brightness);
   }
 */
-/* Третье задание */
+/* Третье задание 
   printf("\nSTM32 ADC example\n");
 
   while(1) {
       printf("ADC read = %i\n\r", (my_adc.read()*100));
       led = !led;
       wait_us(10000);
+  }
+
+
+*/
+
+/* Задача кейса */
+  ReleyControl = 0; // Дверь заперта
+  led = 1; // Лампочка горит, когда дверь заперта
+
+  while(1){
+     
+
+    // Опрашиваем состояние кнопок
+    //==============================
+    if (buttonS1) {
+      currentKeylength++; // Инкрементируем счетчик нажатий
+      currentInput << 2;  // Сдвигаем последовательность кодов нажатий
+      currentInput |= BUTTON1_CODE; // Записываем код очередного нажатия
+    }
+    if (buttonS2) {
+      currentKeylength++;
+      currentInput << 2;
+      currentInput |= BUTTON2_CODE;  
+    }
+    if (buttonS3) {
+      currentKeylength++;
+      currentInput << 2;
+      currentInput |= BUTTON3_CODE; 
+    }
+    if (buttonS4) {
+      currentKeylength++; 
+      currentInput << 2;
+      currentInput |= BUTTON4_CODE; 
+    }
+    //==============================
+
+    // Контроллируем количество нажатий на кнопки и открываем дверь при валидном ключе
+    if (currentKeylength >= 4) {
+      currentKeylength = 0; // Обнуляем счетчик нажатий
+      
+      if (currentInput == VALID_KEY) { // Сравниваем набранную в буфер последовательность нажатий с ключом
+        ReleyControl = !ReleyControl; // Открываем дверь
+        // Мигаем лампочкой в течение ~10 секунд
+        for (uint8_t t = 0; t < 20;){ 
+          led != led; 
+          wait_us(500000);
+        } 
+      }
+      ReleyControl = 0; // Закрываем дверь
+      led = 1; // Включаем постоянное свечение лампочки
+      currentInput = 0; // Очищаем буфер
+    }
   }
 }
