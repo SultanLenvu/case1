@@ -1,36 +1,51 @@
 #include "mbed.h"
 
-// DigitalIn mybutton(USER_BUTTON);
-// DigitalOut myled(LED1);
+/* Первое задание
+DigitalIn mybutton(USER_BUTTON);
+DigitalOut myled(LED1);
+*/
 
-BufferedSerial pc(USBTX, USBRX); // tx, rx
+/* Второе задание
 PwmOut led(LED1);
-float brightness = 0.0;
+int brightness = 0;
+*/
 
-int main()
-{
-  printf("Control of LED dimmer by host terminal\n\r");
-  printf("Press 'u' = brighter, 'd' = dimmer\n\r");
+/* Третье задание */
+AnalogIn my_adc(PA_7); //D11 on board
+DigitalOut led(LED1);
 
-  // if (mybutton == 0) { // Button is pressed
+int main(){
+/* Первое задание
+  if (mybutton == 0) { // Button is pressed
 
-  //     myled = !myled; // Toggle the LED state
-  //     wait_ms(200); // 200 ms
-  // }
+      myled = !myled; // Toggle the LED state
+      wait_ms(200); // 200 ms
+  }
+*/
 
+/* Первое задание
   while(1) {
     char c = getchar();
     wait_us(10);
 
-            if((c == 'u') && (brightness < 0.1)) {
-        brightness += 0.001;
-        led = brightness;
+    if((c == 'u') && (brightness < 1000)) {
+        brightness += 1;
+        led = (float)brightness/10000;
     }
 
-    if((c == 'd') && (brightness > 0.0)) {
-        brightness -= 0.001;
-        led = brightness;
+    if((c == 'd') && (brightness > 0)) {
+        brightness -= 1;
+        led = (float)brightness/10000;
     }
-    printf("%c %f \n \r",c, brightness);
+    printf("%c %i \n \r",c, brightness);
+  }
+*/
+/* Третье задание */
+  printf("\nSTM32 ADC example\n");
+
+  while(1) {
+      printf("ADC read = %i\n\r", (my_adc.read()*100));
+      led = !led;
+      wait_us(10000);
   }
 }
