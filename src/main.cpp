@@ -25,10 +25,10 @@ DigitalOut led(LED1);
 
 /* Задача кейса */
 
-DigitalIn buttonS1(PA_4);
-DigitalIn buttonS2(PB_0);
-DigitalIn buttonS3(PB_3);
-DigitalIn buttonS4(PB_10); 
+DigitalIn buttonS1(PA_0);
+DigitalIn buttonS2(PA_1);
+DigitalIn buttonS3(PA_4);
+DigitalIn buttonS4(PB_0); 
 
 DigitalOut ReleyControl(PC_1);
 DigitalOut led(LED1);
@@ -86,42 +86,49 @@ int main(){
   ReleyControl = 0; // Дверь заперта
   led = 1; // Лампочка горит, когда дверь заперта
 
-  while(1){
-     
+  buttonS1.mode(PullUp);
+  buttonS2.mode(PullUp);
+  buttonS3.mode(PullUp);
+  buttonS4.mode(PullUp);
 
+
+  while(1){
     // Опрашиваем состояние кнопок
     //==============================
-    if (buttonS1) {
+    if (!buttonS1) {
       currentKeylength++; // Инкрементируем счетчик нажатий
-      currentInput << 2;  // Сдвигаем последовательность кодов нажатий
+      currentInput <<= 2;  // Сдвигаем последовательность кодов нажатий
       currentInput |= BUTTON1_CODE; // Записываем код очередного нажатия
     }
-    if (buttonS2) {
+    if (!buttonS2) {
       currentKeylength++;
-      currentInput << 2;
+      currentInput <<= 2;
       currentInput |= BUTTON2_CODE;  
     }
-    if (buttonS3) {
+    if (!buttonS3) {
       currentKeylength++;
-      currentInput << 2;
+      currentInput <<= 2;
       currentInput |= BUTTON3_CODE; 
     }
-    if (buttonS4) {
+    if (!buttonS4) {
       currentKeylength++; 
-      currentInput << 2;
+      currentInput <<= 2;
       currentInput |= BUTTON4_CODE; 
     }
     //==============================
-
+    printf("Current input: %X\n", currentInput);
+    wait_us(500000);
+    //currentKeylength = 0;
     // Контроллируем количество нажатий на кнопки и открываем дверь при валидном ключе
+    
     if (currentKeylength >= 4) {
       currentKeylength = 0; // Обнуляем счетчик нажатий
-      
+    
       if (currentInput == VALID_KEY) { // Сравниваем набранную в буфер последовательность нажатий с ключом
         ReleyControl = !ReleyControl; // Открываем дверь
         // Мигаем лампочкой в течение ~10 секунд
-        for (uint8_t t = 0; t < 20;){ 
-          led != led; 
+        for (uint8_t t = 0; t < 20; t++){ 
+          led = !led; 
           wait_us(500000);
         } 
       }
